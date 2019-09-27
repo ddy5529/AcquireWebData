@@ -1,0 +1,18 @@
+server:
+  port: 80
+
+spring:
+  application:
+    name: vue-web-server
+  datasource:
+    driver-class-name: ${data.datasource.driver-class-name}
+    url: ${data.datasource.url}
+    username: ${data.datasource.username}
+    password: ${data.datasource.password}
+  jpa:
+    hibernate:
+      ddl-auto: create  # 第一次简表create  后面用update
+    show-sql: true
+  jackson:
+    serialization:
+      FAIL_ON_EMPTY_BEANS: false
