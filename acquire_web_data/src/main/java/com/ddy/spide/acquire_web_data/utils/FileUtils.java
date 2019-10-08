@@ -115,8 +115,5 @@ public class FileUtils {
         }
     }
 
-    private static void test1()throws IOException{
-        
-    }
 
 }
