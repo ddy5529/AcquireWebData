@@ -12,4 +12,9 @@ public class DataUtils {
         SimpleDateFormat formatter = new SimpleDateFormat(DataUtils.CompletePattern);
         return formatter.format(new Date());
     }
+
+    public static String getSimpleNowDate(){
+        SimpleDateFormat formatter = new SimpleDateFormat(DataUtils.SimplePattern);
+        return formatter.format(new Date());
+    }
 }

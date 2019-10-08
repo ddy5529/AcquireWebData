@@ -85,15 +85,18 @@ public class FileUtils {
      * 通过文件获取字符串
      * */
     public static String getStringByFile(File file) throws IOException {
-        FileInputStream fip = new FileInputStream(file);
-        // 构建FileInputStream对象
-        InputStreamReader reader = new InputStreamReader(fip, "UTF-8");
-        // 构建InputStreamReader对象,编码与写入相同
         StringBuffer sb = new StringBuffer();
-        while (reader.ready()) {
-            sb.append((char) reader.read());
+        if(file.exists()){
+            FileInputStream fip = new FileInputStream(file);
+            // 构建FileInputStream对象
+            InputStreamReader reader = new InputStreamReader(fip, "UTF-8");
+            // 构建InputStreamReader对象,编码与写入相同
+
+            while (reader.ready()) {
+                sb.append((char) reader.read());
+            }
+            reader.close();
         }
-        reader.close();
         return sb.toString();
     }
 
