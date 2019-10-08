@@ -84,6 +84,16 @@ public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService {
 
     }
 
+    @Override
+    public void calculateStockFluctuationRate() {
+
+    }
+
+    @Override
+    public void calculateStockCapital() {
+
+    }
+
     /**
      * 输出清洗后的数据
      * */
