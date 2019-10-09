@@ -1,5 +1,7 @@
 package com.ddy.spide.acquire_web_data.service;
 
+import com.ddy.spide.acquire_web_data.dao.StockMarkDao;
+import com.ddy.spide.acquire_web_data.model.StockMark;
 import com.ddy.spide.acquire_web_data.utils.DataUtils;
 import com.ddy.spide.acquire_web_data.utils.FileUtils;
 import com.ddy.spide.acquire_web_data.utils.LogUtils;
@@ -13,6 +15,9 @@ import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 
 @Service
@@ -25,6 +30,9 @@ public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService {
 
     private static int lowCount=0;//破低记录数
     private static Double bDouble=0.000;
+
+    @Autowired
+    private StockMarkDao stockMarkDao;
 
     @Bean
     public RestTemplate restTemplate() {
@@ -44,7 +52,7 @@ public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService {
         ResponseEntity<String> responseEntity= restTemplate().getForEntity(webUrl,String.class);
 //        LogUtils.printLog(logger,responseEntity.getBody());
         String bodyStr=responseEntity.getBody();
-        String price=getPrice(bodyStr);
+        String price=getPrice(bodyStr).get("price");
         return Double.parseDouble(price);
     }
 
@@ -54,17 +62,19 @@ public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService {
         ResponseEntity<String> responseEntity= restTemplate().getForEntity(webUrl,String.class);
 //        LogUtils.printLog(logger,responseEntity.getBody());
         String bodyStr=responseEntity.getBody();
-        String price=getPrice(bodyStr);
+        String price=getPrice(bodyStr).get("price");
         logger.info("烽火当前价格：{}",price);
         if (Double.parseDouble(price)>aDouble){
             aDouble=Double.parseDouble(price);
             hightCount++;
             logger.info("烽火突破新高：{}，破高次数：{}",price,hightCount+"");
+
         }
         if (Double.parseDouble(price)<bDouble){
             bDouble=Double.parseDouble(price);
             lowCount++;
             logger.info("烽火突破新低：{}，破低次数：{}",price,lowCount+"");
+
         }
         //printTotalInfo(price);
         try {
@@ -81,6 +91,21 @@ public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService {
 
     @Override
     public void dayEnd() {
+        String webUrl="https://hq.sinajs.cn/?_=0.08652063062388238&list=sh600498";
+        ResponseEntity<String> responseEntity= restTemplate().getForEntity(webUrl,String.class);
+//        LogUtils.printLog(logger,responseEntity.getBody());
+        String bodyStr=responseEntity.getBody();
+        Map<String,String> stockMap=getPrice(bodyStr);
+        StockMark stockMark=new StockMark();
+        stockMark.setStockName(stockMap.get("name"));
+        stockMark.setBreakTheHightRecordCount(hightCount);
+        stockMark.setBreakTheLowRecordCount(lowCount);
+        stockMark.setCreateTime(new Date());
+        stockMark.setUpdateTime(new Date());
+        stockMark.setHightRecord(Double.parseDouble(stockMap.get("hightprice")));
+        stockMark.setLowRecord(Double.parseDouble(stockMap.get("lowprice")));
+        stockMark.setStockNum(600498+"");
+        stockMarkDao.save(stockMark);
 
     }
 
@@ -109,13 +134,22 @@ public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService {
      * 3，当前价格
      * 4，当天最高价格
      * 5，开盘价
-     * 6，
-     * 7，
+     * 6，当前交易买入价格
+     * 7，当前加以卖出价格
      * */
-    private String getPrice(String bodyStr) {
+    private Map<String,String> getPrice(String bodyStr) {
         String content= bodyStr.substring(bodyStr.indexOf("\""),bodyStr.lastIndexOf("\""));
         String arr[]=content.split(",");
-        return arr!=null?arr[3]:"";
+        Map<String,String> resultMap=new HashMap<>();
+        resultMap.put("name",arr[0]);
+        resultMap.put("lowprice",arr[1]);
+        resultMap.put("yesterdayPrice",arr[2]);
+        resultMap.put("price",arr[3]);
+        resultMap.put("hightprice",arr[4]);
+        resultMap.put("openprice",arr[5]);
+        resultMap.put("thisshopprice",arr[6]);
+        resultMap.put("thissellprice",arr[7]);
+        return resultMap;
     }
 
 

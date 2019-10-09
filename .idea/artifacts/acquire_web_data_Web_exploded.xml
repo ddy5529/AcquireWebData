@@ -1,0 +1,13 @@
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="acquire_web_data:Web exploded">
+    <output-path>$PROJECT_DIR$/out/artifacts/acquire_web_data_Web_exploded</output-path>
+    <root id="root">
+      <element id="javaee-facet-resources" facet="acquire_web_data/web/Web" />
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="acquire_web_data" />
+        </element>
+      </element>
+    </root>
+  </artifact>
+</component>
