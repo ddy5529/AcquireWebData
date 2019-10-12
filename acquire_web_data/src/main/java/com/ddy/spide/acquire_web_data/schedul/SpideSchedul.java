@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Component
 public class SpideSchedul {
@@ -19,10 +21,16 @@ public class SpideSchedul {
      */
     @Scheduled(cron = "0/1 * 9-15 * * ?")
     public void testCron() {
-        if (DataUtils.judgeTimeOnTheParam(9, 30, 11, 30)) {
-            spideSINAFinanceService.getFHTXData();
-        } else if (DataUtils.judgeTimeOnTheParam(13, 00, 15, 00)) {
-            spideSINAFinanceService.getFHTXData();
+        List<String> list=new ArrayList<>();
+        list.add("sh600498");
+        //周六周日不做操作
+        if(DataUtils.isHoliday()){
+            return;
+        }
+        if (DataUtils.judgeTimeOnTheParam(9, 29, 11, 30)) {
+            spideSINAFinanceService.getStockByTheSequenceNum(list);
+        } else if (DataUtils.judgeTimeOnTheParam(12, 59, 15, 00)) {
+            spideSINAFinanceService.getStockByTheSequenceNum(list);
         }
     }
 
@@ -30,9 +38,11 @@ public class SpideSchedul {
      * 日终任务:每天下午4点进行清盘结算
      * TODO：把redis的数据放入数据库中进行持久化
      */
-    @Scheduled(cron = "0 * 16 * * ?")
+    @Scheduled(cron = "0 0 16 * * ?")
     public void dayEnd() {
-        spideSINAFinanceService.dayEnd();
+        List<String> list=new ArrayList<>();
+        list.add("sh600498");
+        spideSINAFinanceService.dayEnd(list);
     }
 
 }
