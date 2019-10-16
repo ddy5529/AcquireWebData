@@ -11,7 +11,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 /**
  * 在这个类中添加路由映射，用于静态资源的跳转
  * */
-@Configuration
+//@Configuration
 public class StaticPathConfig extends WebMvcConfigurationSupport {
 
     @Autowired

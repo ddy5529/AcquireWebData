@@ -8,6 +8,7 @@ import com.ddy.spide.acquire_web_data.utils.LogUtils;
 import com.ddy.spide.acquire_web_data.utils.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.ResponseEntity;
@@ -23,9 +24,9 @@ import java.util.Map;
 
 
 @Service
-public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService {
+public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService, InitializingBean {
 
-    Logger logger = LoggerFactory.getLogger(this.getClass());
+    private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private static int hightCount = 0;//破高记录数
     private static Double aDouble = 0.000;
@@ -35,6 +36,8 @@ public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService {
 
     @Autowired
     private StockMarkDao stockMarkDao;
+    @Autowired
+    private RedisService redisService;
 
     @Bean
     public RestTemplate restTemplate() {
@@ -42,20 +45,35 @@ public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService {
     }
 
     @PostConstruct
-    public void init() {
-        //TODO:这里要改成解析文件，然后分析所有行里面的内容，然后得出最高值和最低值
-        Double temp = getFirstData();
-        aDouble = temp;  //TODO：破高记录次数应该放到redis中，该对象的持续时间应该是18小时，对应着股票交易截止时间到次日股票交易时间
-        bDouble = temp;   //TODO:坡低记录次数应该放到redis中
+    public void postConstruct(){
+        System.out.println(this.getClass().getName()+"|PostConstruct");
     }
 
-    private Double getFirstData() {
-        String webUrl = "https://hq.sinajs.cn/?_=0.08652063062388238&list=sh600498";
-        ResponseEntity<String> responseEntity = restTemplate().getForEntity(webUrl, String.class);
-//        LogUtils.printLog(logger,responseEntity.getBody());
-        String bodyStr = responseEntity.getBody();
-        String price = getPrice(bodyStr).get("price");
-        return Double.parseDouble(price);
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        System.out.println(this.getClass().getName()+"|afterPropertiesSet");
+        init();
+    }
+
+    public void init() {
+        String paramStockNum="sh600498";
+        //TODO:这里要改成解析文件，然后分析所有行里面的内容，然后得出最高值和最低值
+        String _hightprice= redisService.getKey(paramStockNum+"_hightprice");
+        if (StringUtils.isNotEmpty(_hightprice)){
+            //TODO：破高记录次数应该放到redis中，该对象的持续时间应该是18小时，对应着股票交易截止时间到次日股票交易时间
+            aDouble = Double.parseDouble(_hightprice);
+        }else{
+            aDouble=getHightPrice(paramStockNum);
+            redisService.setKey(paramStockNum+"_hightprice",aDouble+"");
+        }
+        String _lowprice = redisService.getKey(paramStockNum+"_lowprice");
+        if (StringUtils.isNotEmpty(_lowprice)){
+            //TODO:坡低记录次数应该放到redis中
+            bDouble = Double.parseDouble(_lowprice);
+        }else{
+            bDouble=getLowPrice(paramStockNum);
+            redisService.setKey(paramStockNum+"_lowprice",bDouble+"");
+        }
     }
 
     @Override
@@ -68,17 +86,24 @@ public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService {
         //TODO：从redis中获取 产品编号+下划线+类型 作为主键 ，然后值作为
         ResponseEntity<String> responseEntity = getStockListDataByList(paramStockNumList);
         String bodyStr = responseEntity.getBody();
-        Map<String, String> stockMap = getPrice(bodyStr);
-        StockMark stockMark = new StockMark();
-        stockMark.setStockName(stockMap.get("name"));
-        stockMark.setBreakTheHightRecordCount(hightCount);
-        stockMark.setBreakTheLowRecordCount(lowCount);
-        stockMark.setCreateTime(new Date());
-        stockMark.setUpdateTime(new Date());
-        stockMark.setHightRecord(Double.parseDouble(stockMap.get("hightprice")));
-        stockMark.setLowRecord(Double.parseDouble(stockMap.get("lowprice")));
-        stockMark.setStockNum(600498 + "");
-        stockMarkDao.save(stockMark);
+        for (String paramStockNum : paramStockNumList) {
+            Map<String, String> stockMap = getPrice(bodyStr);
+            String hightprice= stockMap.get("hightprice");
+            String lowprice =stockMap.get("lowprice");
+            StockMark stockMark = new StockMark();
+            stockMark.setStockName(stockMap.get("name"));
+            stockMark.setBreakTheHightRecordCount(hightCount);
+            stockMark.setBreakTheLowRecordCount(lowCount);
+            stockMark.setCreateTime(new Date());
+            stockMark.setUpdateTime(new Date());
+            stockMark.setHightRecord(Double.parseDouble(hightprice));
+            stockMark.setLowRecord(Double.parseDouble(lowprice));
+            stockMark.setStockNum(paramStockNum);
+            stockMarkDao.save(stockMark);
+
+            redisService.setKey(paramStockNum+"_hightprice",hightprice);
+            redisService.setKey(paramStockNum+"_lowprice",lowprice);
+        }
 
     }
 
@@ -133,17 +158,19 @@ public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService {
         String price = resultMap.get("price");
         String stockName = resultMap.get("name");
         logger.info("{}当前价格：{}", stockName, price);
+        String paramStockNum="sh600498";
         if (Double.parseDouble(price) > aDouble) {
             aDouble = Double.parseDouble(price);
             hightCount++;
+            redisService.setKey(paramStockNum+"_hightprice",aDouble+"");
             LogUtils.printLog(logger, StringUtils.getSplitStr("{}突破新高：{}，破高次数：{}", stockName, price, hightCount + ""));
         }
         if (Double.parseDouble(price) < bDouble) {
             bDouble = Double.parseDouble(price);
             lowCount++;
+            redisService.setKey(paramStockNum+"_lowprice",bDouble+"");
             LogUtils.printLog(logger, StringUtils.getSplitStr("{}突破新低：{}，破低次数：{}", stockName, price, lowCount + ""));
         }
-        //printTotalInfo(price);
         try {
             FileUtils.appendWtiteRootFile(DataUtils.getSimpleNowDate(), "烽火通信.data", bodyStr);
         } catch (IOException e) {
@@ -172,7 +199,7 @@ public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService {
         String arr[] = content.split(",");
         Map<String, String> resultMap = new HashMap<>();
         resultMap.put("name", arr[0]);
-        resultMap.put("lowprice", arr[1]);
+        resultMap.put("lowprice", arr[5]);
         resultMap.put("yesterdayPrice", arr[2]);
         resultMap.put("price", arr[3]);
         resultMap.put("hightprice", arr[4]);
@@ -190,6 +217,24 @@ public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService {
     @Override
     public void calculateStockCapital() {
 
+    }
+
+    private Double getLowPrice(String stockNum) {
+        //sh600498
+        String webUrl = "https://hq.sinajs.cn/?_=0.08652063062388238&list="+stockNum;
+        ResponseEntity<String> responseEntity = restTemplate().getForEntity(webUrl, String.class);
+        String bodyStr = responseEntity.getBody();
+        String price = getPrice(bodyStr).get("lowprice");
+        return Double.parseDouble(price);
+    }
+
+    private Double getHightPrice(String stockNum) {
+        //sh600498
+        String webUrl = "https://hq.sinajs.cn/?_=0.08652063062388238&list="+stockNum;
+        ResponseEntity<String> responseEntity = restTemplate().getForEntity(webUrl, String.class);
+        String bodyStr = responseEntity.getBody();
+        String price = getPrice(bodyStr).get("hightprice");
+        return Double.parseDouble(price);
     }
 
 }

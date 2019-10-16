@@ -74,4 +74,7 @@ public class StringUtils {
         System.out.println(getStrByStrArray("？突破新高：，破高次数：？","？","烽火",1+"",2+""));
     }
 
+    public static boolean isNotEmpty(String hightprice) {
+        return !com.alibaba.druid.util.StringUtils.isEmpty(hightprice);
+    }
 }

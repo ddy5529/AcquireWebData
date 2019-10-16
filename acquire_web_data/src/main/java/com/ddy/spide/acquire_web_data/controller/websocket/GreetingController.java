@@ -7,6 +7,8 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.util.HtmlUtils;
 
+import javax.servlet.http.HttpSession;
+
 @Controller
 public class GreetingController {
 
@@ -16,4 +18,5 @@ public class GreetingController {
         //Thread.sleep(1000); // simulated delay
         return new Greeting("Hello, " + HtmlUtils.htmlEscape(message.getName()) + "!");
     }
+
 }
