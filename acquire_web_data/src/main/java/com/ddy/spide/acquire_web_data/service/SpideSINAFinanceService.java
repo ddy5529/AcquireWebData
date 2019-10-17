@@ -10,7 +10,7 @@ public interface SpideSINAFinanceService {
     /**
      * 新增数据推送到网页中
      * */
-    String pushWebSocketData();
+    String pushWebSocketData(String msg);
 
     void dayEnd(List<String> list);
 

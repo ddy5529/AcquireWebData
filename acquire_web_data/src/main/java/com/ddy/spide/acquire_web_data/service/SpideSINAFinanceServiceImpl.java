@@ -38,6 +38,8 @@ public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService, Ini
     private StockMarkDao stockMarkDao;
     @Autowired
     private RedisService redisService;
+    @Autowired
+    private MonitoringRedisService monitoringRedisService;
 
     @Bean
     public RestTemplate restTemplate() {
@@ -76,8 +78,10 @@ public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService, Ini
         }
     }
 
+
     @Override
-    public String pushWebSocketData() {
+    public String pushWebSocketData(String msg) {
+        monitoringRedisService.pushWebServiceMessage(msg);
         return null;
     }
 
@@ -163,13 +167,17 @@ public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService, Ini
             aDouble = Double.parseDouble(price);
             hightCount++;
             redisService.setKey(paramStockNum+"_hightprice",aDouble+"");
-            LogUtils.printLog(logger, StringUtils.getSplitStr("{}突破新高：{}，破高次数：{}", stockName, price, hightCount + ""));
+            String stockInfo=StringUtils.getSplitStr("{}突破新高：{}，破高次数：{}", stockName, price, hightCount + "");
+            LogUtils.printLog(logger, stockInfo);
+            pushWebSocketData(stockInfo);
         }
         if (Double.parseDouble(price) < bDouble) {
             bDouble = Double.parseDouble(price);
             lowCount++;
             redisService.setKey(paramStockNum+"_lowprice",bDouble+"");
-            LogUtils.printLog(logger, StringUtils.getSplitStr("{}突破新低：{}，破低次数：{}", stockName, price, lowCount + ""));
+            String stockInfo=StringUtils.getSplitStr("{}突破新低：{}，破低次数：{}", stockName, price, lowCount + "");
+            LogUtils.printLog(logger, stockInfo);
+            pushWebSocketData(stockInfo);
         }
         try {
             FileUtils.appendWtiteRootFile(DataUtils.getSimpleNowDate(), "烽火通信.data", bodyStr);

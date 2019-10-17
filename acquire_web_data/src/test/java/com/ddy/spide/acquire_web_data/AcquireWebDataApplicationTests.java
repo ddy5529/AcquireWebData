@@ -33,6 +33,9 @@ public class AcquireWebDataApplicationTests {
     }
 
     @Autowired
+    private RedisService redisService;
+
+    @Autowired
     private SpideSINAFinanceService spideSINAFinanceService;
 
     @Test
@@ -73,11 +76,10 @@ public class AcquireWebDataApplicationTests {
         spideSINAFinanceService.getStockByTheSequenceNum(list);
     }
 
-    @Autowired
-    private RedisService redisService;
-
     @Test
     public void redisTest() throws Exception {
+        redisService.getAll();
+
         redisService.setKey("hello","hello1");
         System.out.println(redisService.getKey("hello"));
         redisService.setKey("hello","hello22");
@@ -89,5 +91,7 @@ public class AcquireWebDataApplicationTests {
         redisService.deleteKey("hello");
         System.out.println("_"+redisService.getKey("hello")+"null");
     }
+
+
 
 }
