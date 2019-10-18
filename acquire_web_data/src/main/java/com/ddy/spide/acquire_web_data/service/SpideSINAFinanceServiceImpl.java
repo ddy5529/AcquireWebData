@@ -66,7 +66,6 @@ public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService, Ini
             aDouble = Double.parseDouble(_hightprice);
         }else{
             aDouble=getHightPrice(paramStockNum);
-            redisService.setKey(paramStockNum+"_hightprice",aDouble+"");
         }
         String _lowprice = redisService.getKey(paramStockNum+"_lowprice");
         if (StringUtils.isNotEmpty(_lowprice)){
@@ -74,15 +73,7 @@ public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService, Ini
             bDouble = Double.parseDouble(_lowprice);
         }else{
             bDouble=getLowPrice(paramStockNum);
-            redisService.setKey(paramStockNum+"_lowprice",bDouble+"");
         }
-    }
-
-
-    @Override
-    public String pushWebSocketData(String msg) {
-        monitoringRedisService.pushWebServiceMessage(msg);
-        return null;
     }
 
     @Override
@@ -92,8 +83,8 @@ public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService, Ini
         String bodyStr = responseEntity.getBody();
         for (String paramStockNum : paramStockNumList) {
             Map<String, String> stockMap = getPrice(bodyStr);
-            String hightprice= stockMap.get("hightprice");
-            String lowprice =stockMap.get("lowprice");
+            String hightprice= stockMap.get("hightPrice");
+            String lowprice =stockMap.get("lowPrice");
             StockMark stockMark = new StockMark();
             stockMark.setStockName(stockMap.get("name"));
             stockMark.setBreakTheHightRecordCount(hightCount);
@@ -104,9 +95,6 @@ public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService, Ini
             stockMark.setLowRecord(Double.parseDouble(lowprice));
             stockMark.setStockNum(paramStockNum);
             stockMarkDao.save(stockMark);
-
-            redisService.setKey(paramStockNum+"_hightprice",hightprice);
-            redisService.setKey(paramStockNum+"_lowprice",lowprice);
         }
 
     }
@@ -166,17 +154,17 @@ public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService, Ini
         if (Double.parseDouble(price) > aDouble) {
             aDouble = Double.parseDouble(price);
             hightCount++;
-            redisService.setKey(paramStockNum+"_hightprice",aDouble+"");
             String stockInfo=StringUtils.getSplitStr("{}突破新高：{}，破高次数：{}", stockName, price, hightCount + "");
             LogUtils.printLog(logger, stockInfo);
+            redisService.setDefaultTimeKey(paramStockNum+"_HightPrice_Count",hightCount+"");
             pushWebSocketData(stockInfo);
         }
         if (Double.parseDouble(price) < bDouble) {
             bDouble = Double.parseDouble(price);
             lowCount++;
-            redisService.setKey(paramStockNum+"_lowprice",bDouble+"");
             String stockInfo=StringUtils.getSplitStr("{}突破新低：{}，破低次数：{}", stockName, price, lowCount + "");
             LogUtils.printLog(logger, stockInfo);
+            redisService.setDefaultTimeKey(paramStockNum+"_LowPrice_Count",lowCount+"");
             pushWebSocketData(stockInfo);
         }
         try {
@@ -186,6 +174,7 @@ public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService, Ini
         }
     }
 
+    /**获取数据的类型*/
     private int getTypeByVarStr(String varStr) {
         int resultInt = 0;
         //此处做匹配
@@ -194,27 +183,38 @@ public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService, Ini
 
     /**
      * 0，是名称
-     * 1，是今天最低
-     * 2，上次收盘价格
+     * 1，当天开盘价
+     * 2，昨天收盘价格
      * 3，当前价格
      * 4，当天最高价格
-     * 5，开盘价
+     * 5，当天最低价
      * 6，当前交易买入价格
      * 7，当前加以卖出价格
      */
     private Map<String, String> getPrice(String bodyStr) {
+        String stockNum=bodyStr.substring(11,bodyStr.indexOf("="));
         String content = bodyStr.substring(bodyStr.indexOf("\""), bodyStr.lastIndexOf("\""));
         String arr[] = content.split(",");
         Map<String, String> resultMap = new HashMap<>();
+        resultMap.put("stockNum",stockNum);
         resultMap.put("name", arr[0]);
-        resultMap.put("lowprice", arr[5]);
-        resultMap.put("yesterdayPrice", arr[2]);
+        resultMap.put("lowPrice", arr[5]);
+        resultMap.put("yesterayPrice", arr[2]);
         resultMap.put("price", arr[3]);
-        resultMap.put("hightprice", arr[4]);
-        resultMap.put("openprice", arr[5]);
-        resultMap.put("thisshopprice", arr[6]);
-        resultMap.put("thissellprice", arr[7]);
+        resultMap.put("hightPrice", arr[4]);
+        resultMap.put("openPrice", arr[1]);
+        resultMap.put("thisShopPrice", arr[6]);
+        resultMap.put("thisSellPrice", arr[7]);
+
+        redisService.setDefaultTimeKey(stockNum+"_hightprice",arr[4]+"");
+        redisService.setDefaultTimeKey(stockNum+"_lowprice",arr[5]+"");
         return resultMap;
+    }
+
+    @Override
+    public String pushWebSocketData(String msg) {
+        monitoringRedisService.pushWebServiceMessage(msg);
+        return null;
     }
 
     @Override
@@ -232,7 +232,7 @@ public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService, Ini
         String webUrl = "https://hq.sinajs.cn/?_=0.08652063062388238&list="+stockNum;
         ResponseEntity<String> responseEntity = restTemplate().getForEntity(webUrl, String.class);
         String bodyStr = responseEntity.getBody();
-        String price = getPrice(bodyStr).get("lowprice");
+        String price = getPrice(bodyStr).get("lowPrice");
         return Double.parseDouble(price);
     }
 
@@ -241,7 +241,7 @@ public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService, Ini
         String webUrl = "https://hq.sinajs.cn/?_=0.08652063062388238&list="+stockNum;
         ResponseEntity<String> responseEntity = restTemplate().getForEntity(webUrl, String.class);
         String bodyStr = responseEntity.getBody();
-        String price = getPrice(bodyStr).get("hightprice");
+        String price = getPrice(bodyStr).get("hightPrice");
         return Double.parseDouble(price);
     }
 

@@ -7,6 +7,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller("/mystock")
 public class WebController {
 
+    @ApiOperation("index")
+    @GetMapping("/")
+    public String indexPage(){
+
+        return "index";
+    }
+
     @ApiOperation("addPage")
     @GetMapping("/add")
     public String addMyStock(){

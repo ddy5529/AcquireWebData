@@ -36,8 +36,8 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer{
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         //表示添加了一个/gs-guide-websocket端点，客户端就可以通过这个端点来进行连接
         registry.addEndpoint("/gs-guide-websocket")
-                .addInterceptors(authHandshakeInterceptor)
-                .setHandshakeHandler(myHandshakeHandler)
+//                .addInterceptors(authHandshakeInterceptor)
+//                .setHandshakeHandler(myHandshakeHandler)
                 .withSockJS();
     }
 

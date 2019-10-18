@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -30,6 +31,14 @@ public class AcquireWebDataApplicationTests {
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();
+    }
+
+    @Autowired(required = false)
+    WebTestClient client;
+
+    @Test
+    public void getHello() {
+        client.get().uri("/hello").exchange().expectStatus().isOk();
     }
 
     @Autowired

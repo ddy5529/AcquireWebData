@@ -27,6 +27,13 @@ public class RedisServiceImpl implements RedisService {
     }
 
     @Override
+    public int setDefaultTimeKey(String name, String value) {
+        return setKey(name,value,new Long(1000 * 3600 * 18));
+    }
+
+
+
+    @Override
     public int setKey(String name, String value, Long timeOut) {
         name = ProjectName + name;
         if (timeOut == null) {

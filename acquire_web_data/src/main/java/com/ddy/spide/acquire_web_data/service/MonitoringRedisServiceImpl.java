@@ -1,6 +1,7 @@
 package com.ddy.spide.acquire_web_data.service;
 
 import com.alibaba.fastjson.JSON;
+import com.ddy.spide.acquire_web_data.interfaces.LogRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ public class MonitoringRedisServiceImpl implements MonitoringRedisService {
     @Autowired
     private SimpMessagingTemplate template;
 
+    @LogRecord
     @Override
     public void pushWebServiceMessage(String msg) {
         Map<String,String> map=new HashMap<>();

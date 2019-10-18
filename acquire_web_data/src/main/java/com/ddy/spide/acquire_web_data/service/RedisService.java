@@ -7,6 +7,8 @@ public interface RedisService {
 
     int setKey(String name,String value);
 
+    int setDefaultTimeKey(String name,String value);
+
     int setKey(String name,String value,Long timeOut);
 
     String getKey(String name);
