@@ -28,7 +28,7 @@ public class RedisServiceImpl implements RedisService {
 
     @Override
     public int setDefaultTimeKey(String name, String value) {
-        return setKey(name,value,new Long(1000 * 3600 * 18));
+        return setKey(name,value,new Long(3600 * 18));
     }
 
 
@@ -37,7 +37,7 @@ public class RedisServiceImpl implements RedisService {
     public int setKey(String name, String value, Long timeOut) {
         name = ProjectName + name;
         if (timeOut == null) {
-            timeOut = new Long(1000 * 3600 * 18);
+            timeOut = new Long(3600 * 18);
         }
         Duration duration = Duration.ofSeconds(timeOut);
         stringRedisTemplate.opsForValue().set(name, value, duration);
@@ -60,12 +60,6 @@ public class RedisServiceImpl implements RedisService {
     @Override
     public Map getAll() {
         Map<String,Object> resultMap=new HashMap<String,Object>();
-        //
-        RedisOperations redisOperations = stringRedisTemplate.opsForValue().getOperations();
-        //获取redis工厂类
-        RedisConnectionFactory redisConnectionFactory = stringRedisTemplate.getConnectionFactory();
-        //获取字符格式
-        RedisSerializer redisSerializer = redisOperations.getHashKeySerializer();
         Set<String> keySets =stringRedisTemplate.keys("*");
         for (String keySet : keySets) {
             Object value= getObjKey(keySet);

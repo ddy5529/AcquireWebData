@@ -13,7 +13,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.types.RedisClientInfo;
+import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -21,6 +24,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -85,6 +89,14 @@ public class AcquireWebDataApplicationTests {
         spideSINAFinanceService.getStockByTheSequenceNum(list);
     }
 
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+    @Test
+    public void redisTest1(){
+
+        Map map=redisService.getAll();
+        System.out.println("OK");
+    }
     @Test
     public void redisTest() throws Exception {
         redisService.getAll();

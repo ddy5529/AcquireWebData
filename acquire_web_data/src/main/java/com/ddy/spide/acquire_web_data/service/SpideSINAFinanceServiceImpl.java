@@ -80,6 +80,9 @@ public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService, Ini
     public void dayEnd(List<String> paramStockNumList) {
         //TODO：从redis中获取 产品编号+下划线+类型 作为主键 ，然后值作为
         ResponseEntity<String> responseEntity = getStockListDataByList(paramStockNumList);
+        if (responseEntity==null){
+            return;
+        }
         String bodyStr = responseEntity.getBody();
         for (String paramStockNum : paramStockNumList) {
             Map<String, String> stockMap = getPrice(bodyStr);
@@ -113,7 +116,12 @@ public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService, Ini
             }
         }
         String urlAllStr = urlStr.toString();
-        ResponseEntity<String> responseEntity = restTemplate().getForEntity(urlAllStr, String.class);
+        ResponseEntity<String> responseEntity =null;
+        try {
+            responseEntity=restTemplate().getForEntity(urlAllStr, String.class);
+        }catch (Exception e){
+
+        }
         return responseEntity;
     }
 
