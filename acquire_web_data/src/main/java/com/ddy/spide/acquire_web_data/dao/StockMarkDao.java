@@ -1,6 +1,7 @@
 package com.ddy.spide.acquire_web_data.dao;
 
 import com.ddy.spide.acquire_web_data.model.StockMark;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 
@@ -10,5 +11,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * 也使用一些加一些关键字And、 Or
  *
  * */
+@Lazy
 public interface StockMarkDao extends JpaRepository<StockMark,Integer> {
 }

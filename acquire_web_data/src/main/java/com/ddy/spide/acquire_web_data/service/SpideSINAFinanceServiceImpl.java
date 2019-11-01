@@ -11,7 +11,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -23,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 
+@Lazy
 @Service
 public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService, InitializingBean {
 
@@ -132,9 +135,13 @@ public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService, Ini
         logger.info("当前购买的股票：名称：{},当前价格：{},买入价格:{},当前收益{},买入数量：{},总计手续费：{}，买入手续费:{}，卖出手续费：{}，使用的证券商名称：{}");
     }
 
+    @NonNull
     @Override
     public void getStockByTheSequenceNum(List<String> paramStockNumList) {
         ResponseEntity<String> responseEntity = getStockListDataByList(paramStockNumList);
+        if(responseEntity==null){
+            return;
+        }
         String bodyStr = responseEntity.getBody();
         String webResultArr[] = bodyStr.split("\n");
         for (String webResultStr : webResultArr) {
@@ -164,7 +171,7 @@ public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService, Ini
             hightCount++;
             String stockInfo=StringUtils.getSplitStr("{}突破新高：{}，破高次数：{}", stockName, price, hightCount + "");
             LogUtils.printLog(logger, stockInfo);
-            redisService.setDefaultTimeKey(paramStockNum+"_HightPrice_Count",hightCount+"");
+            redisService.setDefaultTimeKey(paramStockNum+"_"+DataUtils.getSimpleNowDate()+"_HightPrice_Count",hightCount+"");
             pushWebSocketData(stockInfo);
         }
         if (Double.parseDouble(price) < bDouble) {
@@ -172,7 +179,7 @@ public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService, Ini
             lowCount++;
             String stockInfo=StringUtils.getSplitStr("{}突破新低：{}，破低次数：{}", stockName, price, lowCount + "");
             LogUtils.printLog(logger, stockInfo);
-            redisService.setDefaultTimeKey(paramStockNum+"_LowPrice_Count",lowCount+"");
+            redisService.setDefaultTimeKey(paramStockNum+"_"+DataUtils.getSimpleNowDate()+"_LowPrice_Count",lowCount+"");
             pushWebSocketData(stockInfo);
         }
         try {
@@ -199,6 +206,7 @@ public class SpideSINAFinanceServiceImpl implements SpideSINAFinanceService, Ini
      * 6，当前交易买入价格
      * 7，当前加以卖出价格
      */
+    @NonNull
     private Map<String, String> getPrice(String bodyStr) {
         String stockNum=bodyStr.substring(11,bodyStr.indexOf("="));
         String content = bodyStr.substring(bodyStr.indexOf("\""), bodyStr.lastIndexOf("\""));

@@ -5,6 +5,7 @@ import java.util.List;
 /**
  * 爬取新浪财经的服务
  * */
+
 public interface SpideSINAFinanceService {
 
     /**

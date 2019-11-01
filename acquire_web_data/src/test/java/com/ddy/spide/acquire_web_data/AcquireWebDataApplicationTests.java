@@ -5,28 +5,22 @@ import com.ddy.spide.acquire_web_data.service.RedisService;
 import com.ddy.spide.acquire_web_data.service.SpideSINAFinanceService;
 import com.ddy.spide.acquire_web_data.utils.LogUtils;
 import com.ddy.spide.acquire_web_data.utils.StringUtils;
-import org.junit.Assert;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.data.redis.core.types.RedisClientInfo;
-import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest
 public class AcquireWebDataApplicationTests {
 
@@ -93,7 +87,8 @@ public class AcquireWebDataApplicationTests {
     private StringRedisTemplate stringRedisTemplate;
     @Test
     public void redisTest1(){
-
+//        stringRedisTemplate.execute();
+        stringRedisTemplate.getExpire("", TimeUnit.SECONDS);
         Map map=redisService.getAll();
         System.out.println("OK");
     }

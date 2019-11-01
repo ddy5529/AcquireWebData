@@ -17,13 +17,6 @@ public class StaticPathConfig extends WebMvcConfigurationSupport {
     @Autowired
     private ProductServiceInterceptor productServiceInterceptor;
 
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/static/**").addResourceLocations("classpath:/static/");
-        //registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/webjars/");
-        super.addResourceHandlers(registry);
-    }
-
     /**
      * 添加拦截器
      * */

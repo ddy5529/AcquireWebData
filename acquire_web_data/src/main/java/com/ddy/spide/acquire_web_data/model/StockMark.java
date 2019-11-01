@@ -1,5 +1,7 @@
 package com.ddy.spide.acquire_web_data.model;
 
+import org.springframework.context.annotation.Lazy;
+
 import javax.persistence.*;
 import java.util.Date;
 
@@ -7,6 +9,7 @@ import java.util.Date;
  * 股票标记
  * */
 @Entity
+@Lazy
 public class StockMark {
 
     @Id

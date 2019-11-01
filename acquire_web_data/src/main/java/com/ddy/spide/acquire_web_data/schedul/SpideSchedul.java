@@ -3,12 +3,14 @@ package com.ddy.spide.acquire_web_data.schedul;
 import com.ddy.spide.acquire_web_data.service.SpideSINAFinanceService;
 import com.ddy.spide.acquire_web_data.utils.DataUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
 
 @Component
 public class SpideSchedul {

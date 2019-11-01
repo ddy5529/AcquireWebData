@@ -1,5 +1,7 @@
 package com.ddy.spide.acquire_web_data.model;
 
+import org.springframework.context.annotation.Lazy;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -10,6 +12,7 @@ import java.util.Date;
  * 我的股票
  * */
 @Entity
+@Lazy
 public class MyStock {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

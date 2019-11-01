@@ -1,11 +1,14 @@
 package com.ddy.spide.acquire_web_data.model;
 
+import org.springframework.context.annotation.Lazy;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import java.io.Serializable;
 
 @Entity
+@Lazy
 public class Account implements Serializable {
 
     @Id

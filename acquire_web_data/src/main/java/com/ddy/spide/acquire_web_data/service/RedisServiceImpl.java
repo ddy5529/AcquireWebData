@@ -31,8 +31,6 @@ public class RedisServiceImpl implements RedisService {
         return setKey(name,value,new Long(3600 * 18));
     }
 
-
-
     @Override
     public int setKey(String name, String value, Long timeOut) {
         name = ProjectName + name;

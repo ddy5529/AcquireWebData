@@ -117,7 +117,7 @@ public class DataUtils {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(new Date());
         int year = calendar.get(Calendar.YEAR);
-        calendar.set(year, month, day);
+        calendar.set(year, month-1, day);
         return calendar.getTime();
     }
 
