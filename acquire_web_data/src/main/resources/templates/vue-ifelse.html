@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:v-on="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</head>
+<body>
+<div id="app">
+    <template v-if="ok">
+        <h1>Title</h1>
+        <p>Paragraph 1</p>
+        <p>Paragraph 2</p>
+    </template>
+    <br/>
+
+    <div v-if="Math.random() > 0.5">
+        Now you see me
+    </div>
+    <div v-else>
+        Now you don't
+    </div>
+    <br/>
+
+    <div v-if="type === 'A'">
+        A
+    </div>
+    <div v-else-if="type === 'B'">
+        B
+    </div>
+    <div v-else-if="type === 'C'">
+        C
+    </div>
+    <div v-else>
+        Not A/B/C
+    </div>
+    <br/>
+
+    <h3>不设定key值时，模板里的组件会被复用，也就是说dom没变</h3>
+    <template v-if="loginType === 'username'">
+        <label>Username</label>
+        <input placeholder="Enter your username" v-on:keydown="loginKeyDown">
+    </template>
+    <template v-else>
+        <label>Email</label>
+        <input placeholder="Enter your email address" v-on:keydown="loginKeyDown">
+    </template>
+
+    <br/><br/>
+    <h3>设定key值后，模板里的组件会不会被复用，也就是说dom被重新渲染</h3>
+    <template v-if="form">
+        <label>Username</label>
+        <input placeholder="Enter your username" key="username-input">
+    </template>
+    <template v-else>
+        <label>Email</label>
+        <input placeholder="Enter your email address" key="email-input">
+    </template>
+    <button v-on:click="clickOn">提交</button>
+    <br/>
+
+    <h1 v-show="ok">Hello!</h1>
+
+    <ul id="example-2">
+        <li v-for="(item, index) in items">
+            {{ parentMessage }} - {{ index }} - {{ item.message }} - {{ item.index }}
+        </li>
+    </ul>
+    <br/>
+    <div v-for="(value, name) in items">
+        {{ name }}: {{ value }}
+    </div>
+
+    <br/>
+    <div v-for="(value, name) in object">
+        {{ name }}: {{ value }}
+    </div>
+    <br/>
+
+    <h4 style="color:red">在遍历对象时，会按 Object.keys() 的结果遍历，但是不能保证它的结果在不同的 JavaScript 引擎下都一致。</h4>
+    <div v-for="(value, name, index) in object">
+        {{ index }}. {{ name }}: {{ value }}
+    </div>
+    <br/>
+
+
+
+
+</div>
+<br/><br/>
+<div id='example-3'>
+    <input type="checkbox" id="jack" value="Jack" v-model="checkedNames">
+    <label for="jack">Jack</label>
+    <input type="checkbox" id="john" value="John" v-model="checkedNames">
+    <label for="john">John</label>
+    <input type="checkbox" id="mike" value="Mike" v-model="checkedNames">
+    <label for="mike">Mike</label>
+    <br>
+    <span>Checked names: {{ checkedNames }}</span>
+
+    <br/><br/>
+    <input type="radio" id="one" value="One" v-model="picked">
+    <label for="one">One</label>
+    <br>
+    <input type="radio" id="two" value="Two" v-model="picked">
+    <label for="two">Two</label>
+    <br>
+    <span>Picked: {{ picked }}</span>
+
+    <br/><br/>
+    <select v-model="selected">
+        <option disabled value="">请选择</option>
+        <option>A</option>
+        <option>B</option>
+        <option>C</option>
+    </select>
+    <span>Selected: {{ selected }}</span>
+
+    <br/><br/>
+    <select v-model="selecteds" multiple style="width: 50px;">
+        <option disabled value="">请选择</option>
+        <option>A</option>
+        <option>B</option>
+        <option>C</option>
+        <option>C</option><option>C</option><option>C</option><option>C</option><option>C</option><option>C</option><option>C</option><option>C</option>
+    </select>
+    <br>
+    <span>超级复选Selected: {{ selecteds }}</span>
+</div>
+<script>
+
+    var app = new Vue({
+        el: '#app',
+        data: {
+            ok: true
+            ,form: true
+            ,type: 'C'
+            ,loginType: 'username'
+            ,parentMessage: 'Parent'
+            ,items: [
+                { message: 'Foo',index: 1 },
+                { message: 'Bar',index: 2  }
+            ]
+            ,object: {
+                title: 'How to do lists in Vue',
+                author: 'Jane Doe',
+                publishedAt: '2016-04-10'
+            }
+        },
+        methods: {
+            loginKeyDown: function (e) {
+                console.log(e.key);
+                if (e.key==="Enter"){
+                    this.loginType='';
+                }else{
+                    this.loginType='username';
+                }
+            }
+            ,clickOn:function(){
+                this.form=!this.form;
+            }
+        }
+    })
+
+    var app2 =new Vue({
+        el: '#example-3',
+        data: {
+            checkedNames: [],
+            picked: '',
+            selected: '',
+            selecteds:[]
+        }
+    })
+</script>
+</body>
+</html>
