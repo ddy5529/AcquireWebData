@@ -1,6 +1,7 @@
 package com.ddy.spide.acquire_web_data;
 
 import com.ddy.spide.acquire_web_data.interfaces.LogRecord;
+import com.ddy.spide.acquire_web_data.service.Redis2Service;
 import com.ddy.spide.acquire_web_data.service.RedisService;
 import com.ddy.spide.acquire_web_data.service.SpideSINAFinanceService;
 import com.ddy.spide.acquire_web_data.utils.LogUtils;
@@ -11,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -44,6 +46,10 @@ public class AcquireWebDataApplicationTests {
 
     @Autowired
     private SpideSINAFinanceService spideSINAFinanceService;
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    private Redis2Service redis2Service;
 
     @Test
     public void contextLoads() {
@@ -83,8 +89,7 @@ public class AcquireWebDataApplicationTests {
         spideSINAFinanceService.getStockByTheSequenceNum(list);
     }
 
-    @Autowired
-    private StringRedisTemplate stringRedisTemplate;
+
     @Test
     public void redisTest1(){
 //        stringRedisTemplate.execute();
@@ -92,22 +97,27 @@ public class AcquireWebDataApplicationTests {
         Map map=redisService.getAll();
         System.out.println("OK");
     }
+
     @Test
     public void redisTest() throws Exception {
         redisService.getAll();
-
-        redisService.setKey("hello","hello1");
-        System.out.println(redisService.getKey("hello"));
-        redisService.setKey("hello","hello22");
-        System.out.println(redisService.getKey("hello"));
-        redisService.setKey("hello","hello333");
-        System.out.println(redisService.getKey("hello"));
-        redisService.setKey("hello","hello4444");
-        System.out.println(redisService.getKey("hello"));
-        redisService.deleteKey("hello");
-        System.out.println("_"+redisService.getKey("hello")+"null");
     }
 
+    @Test
+    public void testDb(){
+        LettuceConnectionFactory jedisConnectionFactory = (LettuceConnectionFactory) stringRedisTemplate.getConnectionFactory();
+        System.out.println("当前所在的db："+jedisConnectionFactory.getDatabase());
+        jedisConnectionFactory.setDatabase(2);
+        stringRedisTemplate.setConnectionFactory(jedisConnectionFactory);
+        jedisConnectionFactory.resetConnection();
+        System.out.println("当前所在的db："+jedisConnectionFactory.getDatabase());
+    }
+
+    @Test
+    public void test122(){
+        redisService.getAll();
+        redis2Service.getAll();
+    }
 
 
 }
