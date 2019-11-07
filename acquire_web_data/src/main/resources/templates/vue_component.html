@@ -49,6 +49,15 @@
             v-bind:title="post.text"
     ></blog-post>
 
+    <div :style="{ fontSize: postFontSize + 'em' }">
+        <blog-post-new
+                v-for="post in posts"
+                v-bind:key="post.id"
+                v-bind:post="post"
+                v-on:enlarge-text="postFontSize += 0.1"
+        ></blog-post-new>
+    </div>
+
     <blog-post
             v-for="post in new_posts"
             v-bind:key="post.id"
@@ -78,6 +87,17 @@
         template: '<h3>{{ title }}</h3>'
     })
 
+    Vue.component('blog-post-new', {
+        props: ['post'],
+        template: `<div class="blog-post" style="border-top-style: inset;">
+                <button v-on:click="$emit('enlarge-text')">
+                  Enlarge text
+                </button>
+              <h3>{{ post.title }}</h3>
+              <span style="color: #8a6d3b">publishedAt: {{post.publishedAt}}  </span><div v-html="post.content"></div>
+              <div><br/>{{post.comments}}</div>
+            </div>`
+    })
 
 
     var app2 = new Vue({
@@ -89,14 +109,21 @@
             groceryList: [
                 {id: 0, text: '蔬菜'},
                 {id: 1, text: '奶酪'},
-                {id: 2, text: '随便其它什么人吃的东西'}
+                {id: 2, text: '随便其点什么人吃的东西'}
             ],
             posts: [
-                {id: 1, title: 'My journey with Vue'},
+                {
+                    id: 1,
+                    title: 'My journey with Vue',
+                    content: '<span style="color: #1b6d85">content</span>',
+                    publishedAt: 'github',
+                    comments: '评论'
+                },
                 {id: 2, title: 'Blogging with Vue'},
                 {id: 3, title: 'Why Vue is so fun'}
             ],
-            new_posts:[]
+            new_posts: [],
+            postFontSize: 1
         },
         created: function () {
             // Alias the component instance as `vm`, so that we
