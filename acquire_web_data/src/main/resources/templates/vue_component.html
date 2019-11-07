@@ -4,60 +4,114 @@
     <meta charset="UTF-8">
     <title>vue-component</title>
     <!-- 开发环境版本，包含了有帮助的命令行警告 -->
-	<!--
+    <!--
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-	 -->
-	<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+     -->
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
 
- 
+
 </head>
 <body>
 <div id="app">
-<ol>
-  <!-- 创建一个 todo-item 组件的实例 -->
-  <todo-item></todo-item>
-</ol><br/>
+    <ol>
+        <!-- 创建一个 todo-item 组件的实例 -->
+        <todo-item></todo-item>
+    </ol>
+    <br/>
 
+    <ol>
+        <!--
+          现在我们为每个 todo-item 提供 todo 对象
+          todo 对象是变量，即其内容可以是动态的。
+          我们也需要为每个组件提供一个“key”，稍后再
+          作详细解释。
+        -->
+        <mycomponent
+                v-for="item in groceryList"
+                v-bind:todo="item"
+                v-bind:key="item.id"
+        ></mycomponent>
+    </ol>
 
-<ol>
-    <!--
-      现在我们为每个 todo-item 提供 todo 对象
-      todo 对象是变量，即其内容可以是动态的。
-      我们也需要为每个组件提供一个“key”，稍后再
-      作详细解释。
-    -->
-    <mycomponent
-      v-for="item in groceryList"
-      v-bind:todo="item"
-      v-bind:key="item.id"
-    ></mycomponent>
-  </ol>
-<div>
+    <button-counter></button-counter>
+    <button-counter></button-counter>
+    <button-counter></button-counter>
 
+    <blog-post
+            v-for="post in posts"
+            v-bind:key="post.id"
+            v-bind:title="post.title"
+    ></blog-post>
+
+    <blog-post
+            v-for="post in groceryList"
+            v-bind:key="post.id"
+            v-bind:title="post.text"
+    ></blog-post>
+
+    <blog-post
+            v-for="post in new_posts"
+            v-bind:key="post.id"
+            v-bind:title="post.title"
+    ></blog-post>
+</div>
 
 <script>
-	Vue.component('todo-item', {
-	  template: '<li>这是个待办项</li>'
-	})
-	Vue.component('mycomponent', {
-		props: ['todo'],
-	  template: '<li>{{ todo.text }}</li>'
-	})
-	
-	var app2 = new Vue({
-	  el: '#app',
-	  data: {
-		message: 'Hello Vue.js!',
-		message2: 'app-2 页面加载于 ' + new Date().toLocaleString(),
-		seen: true,
-		groceryList: [
-		  { id: 0, text: '蔬菜' },
-		  { id: 1, text: '奶酪' },
-		  { id: 2, text: '随便其它什么人吃的东西' }
-		]
-	  }
-	})
-	
+    Vue.component('todo-item', {
+        template: '<li>这是个待办项</li>'
+    })
+    Vue.component('mycomponent', {
+        props: ['todo'],
+        template: '<li>{{ todo.text }}</li>'
+    })
+    Vue.component('button-counter', {
+        data: function () {
+            return {
+                count: 0
+            }
+        },
+        template: '<button v-on:click="count++">You clicked me {{ count }} times.</button>'
+    })
+
+    Vue.component('blog-post', {
+        props: ['title'],
+        template: '<h3>{{ title }}</h3>'
+    })
+
+
+
+    var app2 = new Vue({
+        el: '#app',
+        data: {
+            message: 'Hello Vue.js!',
+            message2: 'app-2 页面加载于 ' + new Date().toLocaleString(),
+            seen: true,
+            groceryList: [
+                {id: 0, text: '蔬菜'},
+                {id: 1, text: '奶酪'},
+                {id: 2, text: '随便其它什么人吃的东西'}
+            ],
+            posts: [
+                {id: 1, title: 'My journey with Vue'},
+                {id: 2, title: 'Blogging with Vue'},
+                {id: 3, title: 'Why Vue is so fun'}
+            ],
+            new_posts:[]
+        },
+        created: function () {
+            // Alias the component instance as `vm`, so that we
+            // can access it inside the promise function
+            var vm = this
+            // Fetch our array of posts from an API
+            fetch('https://jsonplaceholder.typicode.com/posts')
+                .then(function (response) {
+                    return response.json()
+                })
+                .then(function (data) {
+                    vm.new_posts = data
+                })
+        }
+    })
 
 
 </script>
