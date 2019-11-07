@@ -54,7 +54,7 @@
                 v-for="post in posts"
                 v-bind:key="post.id"
                 v-bind:post="post"
-                v-on:enlarge-text="postFontSize += 0.1"
+                v-on:enlarge-text="onEnlargeText"
         ></blog-post-new>
     </div>
 
@@ -90,7 +90,7 @@
     Vue.component('blog-post-new', {
         props: ['post'],
         template: `<div class="blog-post" style="border-top-style: inset;">
-                <button v-on:click="$emit('enlarge-text')">
+                <button v-on:click="$emit('enlarge-text', 0.1)">
                   Enlarge text
                 </button>
               <h3>{{ post.title }}</h3>
@@ -98,7 +98,6 @@
               <div><br/>{{post.comments}}</div>
             </div>`
     })
-
 
     var app2 = new Vue({
         el: '#app',
@@ -124,6 +123,11 @@
             ],
             new_posts: [],
             postFontSize: 1
+        },
+        methods: {
+            onEnlargeText: function (enlargeAmount) {
+                this.postFontSize += enlargeAmount
+            }
         },
         created: function () {
             // Alias the component instance as `vm`, so that we
